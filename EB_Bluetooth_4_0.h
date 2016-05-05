@@ -9,9 +9,13 @@
 
   Written by Steve for MakerStudio.  
   BSD license, all text above must be included in any redistribution
+  Updated by: Daniele Fornaciari (d.fornaciari@gmail.com)
  ****************************************************/
+  
 #ifndef _EB_BLUETOOTH_4_0_H
 #define _EB_BLUETOOTH_4_0_H
+
+#define AT_NAME "AT+NAME"
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
@@ -24,6 +28,7 @@ public:
   void begin();
   
   int setName(String name);
+  void getName(String *result);
   int print(uint8_t byte);
   int read();
   int available();
@@ -32,6 +37,8 @@ private:
   uint8_t EB_rxPin;
   uint8_t EB_txPin;
   SoftwareSerial swSerial;
+
+  void sendCommand(String command, String *result);
   
 };
 

@@ -9,6 +9,7 @@
 
   Written by Steve for MakerStudio.  
   BSD license, all text above must be included in any redistribution
+  Updated by: Daniele Fornaciari (d.fornaciari@gmail.com)
  ****************************************************/
 #include "EB_Bluetooth_4_0.h"
 
@@ -28,38 +29,59 @@ void EB_Bluetooth_4_0::begin()
 	
 	swSerial.begin(9600);// the default baudrate is 9600
 	
+}
 
+void EB_Bluetooth_4_0::sendCommand(String command, String *result)
+{
+	char recvChar;
 	
+	int cmdLen = command.length();
+	
+	for(int i = 0; i < cmdLen; i++){
+		swSerial.write(command[i]);
+	}
+	
+	delay(100);
+
+	if(available()==0){
+		Serial.println("Non ricevo nulla");
+	}
+
+	while(available()){
+		recvChar = read();
+		*result += recvChar;
+	}
+}
+
+void EB_Bluetooth_4_0::getName(String *name)
+{
+	String cmd(AT_NAME"?");
+	String recvBuf;
+	String subString;
+
+	sendCommand(cmd,&recvBuf);
+	subString = recvBuf.substring(8);	
+
+	//OK+Name:
+	for(int i = 0; i<subString.length(); i++){
+		*name += subString[i];
+	}
 }
 
 int EB_Bluetooth_4_0::setName(String name)
 {
 	int isSuccess = 0;
+	String cmd(AT_NAME);
+	cmd += name;
 	
 	String recvBuf;
-	char recvChar;
-	
-	String cmd("AT+NAME");
-	cmd += name;
 
-	int cmdLen = cmd.length();
+	sendCommand(cmd,&recvBuf);
 	
-	for(int i = 0; i < 18; i++){
-		swSerial.write(cmd[i]);
+	if(recvBuf.indexOf(name) != -1){
+		isSuccess= 1;
 	}
-	
-	delay(100);
-	int len = 0;
-	if(len = available()){
-		for(int i = 0; i < len; i++){
-			recvChar = read();
-			Serial.print(recvChar);
-			recvBuf += recvChar;
-		}
-		if(recvBuf.indexOf(name) != -1){
-			isSuccess= 1;
-		}
-	}
+
 	return isSuccess;
 }
 
